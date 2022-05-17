@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: camel-quarkus-demo
+  namespace: camel-quarkus-demo
+  labels:
+    app: camel-quarkus-soap
+    expose: 'true'
+    group: com.redhat.consulting.demo
+    provider: jkube
+    version: 1.0.0  
+spec:
+  selector:
+    app: camel-quarkus-demo
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

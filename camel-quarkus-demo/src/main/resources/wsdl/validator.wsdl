@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://soap.demo.consulting.redhat.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="ValidatorWebServiceService" targetNamespace="http://soap.demo.consulting.redhat.com/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns0="http://com.redhat.consulting.demo.soap.model/types" xmlns="http://soap.demo.consulting.redhat.com/" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://soap.demo.consulting.redhat.com/" version="1.0">
+  <xs:import namespace="http://com.redhat.consulting.demo.soap.model/types"/>
+  <xs:complexType name="documentRequest">
+    <xs:sequence>
+      <xs:element name="number" type="xs:string"/>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="country" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="validateDocument" type="validateDocument"/>
+  <xs:complexType name="validateDocument">
+    <xs:sequence>
+      <xs:element name="request" type="documentRequest"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="validateDocumentResponse" type="validateDocumentResponse"/>
+  <xs:complexType name="validateDocumentResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="ns0:DocumentResponse"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://soap.demo.consulting.redhat.com/" targetNamespace="http://com.redhat.consulting.demo.soap.model/types" version="1.0">
+
+  <xs:import namespace="http://soap.demo.consulting.redhat.com/"/>
+
+  <xs:element name="contracts" type="ns1:documentRequest"/>
+
+
+  <xs:complexType name="DocumentResponse">
+    <xs:sequence>
+      <xs:element name="valid" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="validateDocumentResponse">
+    <wsdl:part element="tns:validateDocumentResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="validateDocument">
+    <wsdl:part element="tns:validateDocument" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="ValidatorWebService">
+    <wsdl:operation name="validateDocument">
+      <wsdl:input message="tns:validateDocument" name="validateDocument">
+    </wsdl:input>
+      <wsdl:output message="tns:validateDocumentResponse" name="validateDocumentResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="ValidatorWebServiceServiceSoapBinding" type="tns:ValidatorWebService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="validateDocument">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="validateDocument">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="validateDocumentResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ValidatorWebServiceService">
+    <wsdl:port binding="tns:ValidatorWebServiceServiceSoapBinding" name="ValidatorWebServicePort">
+      <soap:address location="http://camel-quarkus-soap-camel-quarkus-demo.apps.cluster-fs9ff.fs9ff.sandbox1420.opentlc.com/soap/validator?wsdl"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

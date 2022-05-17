@@ -1,0 +1,22 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: api
+  namespace: camel-quarkus-demo
+  labels:
+    app: camel-quarkus-soap
+    expose: 'true'
+    group: com.redhat.consulting.demo
+    provider: jkube
+    version: 1.0.0  
+spec:  
+  to:
+    kind: Service
+    name: camel-quarkus-demo
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None
