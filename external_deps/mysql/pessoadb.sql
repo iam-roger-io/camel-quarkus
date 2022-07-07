@@ -8,10 +8,11 @@ CREATE TABLE `tb_pessoa` (
   `email` varchar(45) DEFAULT NULL,
   `tipo_pessoa` varchar(15) DEFAULT NULL,
   `cpf_cnpj` varchar(18) NOT NULL,
+  `status` varchar(100) NOT NULL,
+  `status_message` varchar(5000) DEFAULT NULL,
   `verification_code` varchar(45) NOT NULL,
   `verification_date` varchar(19) NOT NULL,
   PRIMARY KEY (`pessoaId`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
-drop table  tb_pessoa
 

@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.acme</groupId>
-	<artifactId>camel-quarkus-demo</artifactId>
+	<artifactId>camel-quarkus-consumer</artifactId>
 	<version>1.0.0</version>
 
 	<properties>
@@ -87,6 +87,15 @@
 		<dependency>
 			<groupId>org.jboss.logmanager</groupId>
 			<artifactId>log4j2-jboss-logmanager</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-rest-client</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>io.quarkus</groupId>
+		    <artifactId>quarkus-rest-client-jackson</artifactId>
 		</dependency>
 		
 <!-- extensões para métricas -->		
