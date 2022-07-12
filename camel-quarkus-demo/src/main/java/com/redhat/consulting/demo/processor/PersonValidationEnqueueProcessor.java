@@ -32,7 +32,7 @@ public class PersonValidationEnqueueProcessor implements Processor {
 		emitter.send(pessoa);
 
 		logger.debug("### Queued Person(request):" + pessoa.getCpf() + " for validation ");
-
+		exchange.getIn().setBody(pessoa);
 	}
 
 }

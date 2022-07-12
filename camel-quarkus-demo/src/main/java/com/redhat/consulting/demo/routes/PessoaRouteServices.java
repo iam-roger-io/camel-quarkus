@@ -3,15 +3,20 @@ package com.redhat.consulting.demo.routes;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.redhat.consulting.demo.model.PessoaCsvAdapter;
 import com.redhat.consulting.demo.model.PessoaModel;
 import com.redhat.consulting.demo.model.Verification;
 import com.redhat.consulting.demo.processor.ExceptionProcessor;
+import com.redhat.consulting.demo.processor.PersonCsvToModelProcessor;
+import com.redhat.consulting.demo.processor.PersonModeToCsvProcessor;
 import com.redhat.consulting.demo.processor.PersonValidationEnqueueProcessor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.apache.camel.model.dataformat.BindyType;
+import org.apache.camel.processor.aggregate.GroupedBodyAggregationStrategy;
 import org.jboss.logging.Logger;
 
 /**
@@ -23,7 +28,13 @@ public class PessoaRouteServices extends RouteBuilder {
 	private static final Logger logger = Logger.getLogger(PessoaRouteServices.class);
 
 	@Inject
-	private PersonValidationEnqueueProcessor personValidationEnqueueProcessor;
+	PersonCsvToModelProcessor personValidationCsvEnqueueProcessor;
+
+	@Inject
+	PersonValidationEnqueueProcessor personValidationEnqueueProcessor;
+
+	@Inject
+	PersonModeToCsvProcessor personModeToCsvProcessor;
 
 	@Override
 	public void configure() throws Exception {
@@ -61,6 +72,39 @@ public class PessoaRouteServices extends RouteBuilder {
 
 				.to("microprofile-metrics:counter:camel_demo_quarkus_count_criar_pessoa?counterIncrement=1")
 
+				.to("direct:verificar-pessoa") // Passa o fluxo para uma rota que irá chamar um serviço REST
+
+				.to("jpa://com.redhat.consulting.demo.entity.Pessoa")
+
+				.process(personValidationEnqueueProcessor) // Este processor adicionara o usuario cadastrado a fila para
+				// validacao no servico SOAP.
+
+				.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));
+
+		from("direct:processar-pessoa-batch").routeId("route-processar-pessoa-batch")
+				.log("Reading Persons CSV data from ${header.CamelFileName}")
+				// Consume person CSV files
+				.pollEnrich(
+						"file:{{upload-processor-config.upload-dir}}?fileName=${header.fileName}&noop=true&idempotent=false")
+//				.from("file:{{upload-processor-config.upload-dir}}/${header.fileName}")
+				.log("Processing file  ${body}").unmarshal().bindy(BindyType.Csv, PessoaCsvAdapter.class).split(body())
+				.log("Processing  ${body.cpf}").setProperty("PersonCsv", simple("${body}"))
+				.process(personValidationCsvEnqueueProcessor)
+
+				.to("direct:verificar-pessoa") // Passa o fluxo para uma rota que irá chamar um serviço REST
+
+				.to("jpa://com.redhat.consulting.demo.entity.Pessoa").setProperty("pessoaModel", simple("${body}"))
+
+				.process(personValidationEnqueueProcessor).process(personModeToCsvProcessor)
+
+				.aggregate(simple("${body.status}"), new GroupedBodyAggregationStrategy()).completionInterval(5000)
+				.log("Processed ${header.CamelAggregatedSize} persons for status '${header.PersonStatus}'")
+				.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));
+
+		from("direct:criar-pessoa-batch").routeId("route-criar-pessoa-batch")
+
+				.to("microprofile-metrics:counter:camel_demo_quarkus_count_criar_pessoa?counterIncrement=1")
+
 				.process(personValidationEnqueueProcessor) // Este processor adicionara o usuario cadastrado a fila para
 															// validacao no servico SOAP.
 
@@ -68,9 +112,13 @@ public class PessoaRouteServices extends RouteBuilder {
 
 				.to("jpa://com.redhat.consulting.demo.entity.Pessoa")
 
-				.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
+				.to("direct:aggregatePersons");
 
-				.setBody(header(Exchange.HTTP_RESPONSE_TEXT));
+		// Aggregate books based on their genre
+		from("direct:aggregatePersons").setHeader("PersonStatus", simple("${body.status}"))
+				.aggregate(simple("${body.status}"), new GroupedBodyAggregationStrategy()).completionInterval(5000)
+				.log("Processed ${header.CamelAggregatedSize} persons for status '${header.PersonStatus}'")
+				.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));
 
 		/*
 		 * Rota para invocar um serviço rest e completar os dados do objeto PessoaModel
