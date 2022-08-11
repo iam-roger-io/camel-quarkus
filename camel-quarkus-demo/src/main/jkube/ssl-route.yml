@@ -2,7 +2,6 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: api
-  namespace: camel-quarkus-demo
   labels:
     app: camel-quarkus-soap
     expose: 'true'
