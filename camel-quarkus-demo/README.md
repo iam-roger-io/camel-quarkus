@@ -47,3 +47,13 @@ oc new-app --template=mysql-persistent \
 ./mvnw oc:build oc:resource oc:apply -Popenshift
 ```
 
+
+Request POST
+```
+{
+  "nome": "Eunice Silva ",
+  "email": "eunice@uk.com",
+  "cpf": "91622939077",
+  "tipoPessoa":"FISICA"
+}
+```
