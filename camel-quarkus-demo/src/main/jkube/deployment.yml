@@ -8,14 +8,22 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: ${project.artifactId}
+            name: camel-quarkus-demo
             items:
-            - key: application.properties
-              path: application.properties
+              - key: application.properties
+                path: application.properties
+            defaultMode: 420
+        - name: kafka-cert
+          configMap:
+            name: kafka-cert
+            defaultMode: 420              
       containers:
         - volumeMounts:
             - name: config
               mountPath: /deployments/config
+            - name: kafka-cert
+              mountPath: /opt/jboss/truststore.jks
+              subPath: truststore.jks              
           ports:
             - containerPort: 8080
               protocol: TCP              
