@@ -56,22 +56,7 @@ public class PessoaRouteServices extends RouteBuilder {
         .toD("jpa://com.redhat.consulting.demo.entity.PessoaModel?nativeQuery=delete from tb_pessoa  where pessoaID = ${header.pessoaId}")
         .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));
         
-        /*
-         * Insert nova pessoa na base de dados.
-         */
-        from("direct:criar-pessoa").routeId("route-criar-pessoa")        
         
-        .to("microprofile-metrics:counter:camel_demo_quarkus_count_criar_pessoa?counterIncrement=1")
-        
-        .process(validarPessoaProcessor) //Este processor injetado (CDI) irá chamar um serviço SOAP.
-        
-        .to("direct:verificar-pessoa") // Passa o fluxo para uma rota que irá chamar um serviço REST  		
-        
-        .to("jpa://com.redhat.consulting.demo.entity.Pessoa")   		
-        
-        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
-    	
-        .setBody(header(Exchange.HTTP_RESPONSE_TEXT));                
         
     	/*
 		 * Rota para invocar um serviço rest e completar os dados do objeto PessoaModel
@@ -103,7 +88,40 @@ public class PessoaRouteServices extends RouteBuilder {
         	} 
         	exchange.getIn().setBody(pessoa);
         });		        
+
+		
+        /*
+         * Esta rota grava uma pessoa na base de dados
+         */
+        from("direct:criar-pessoa").routeId("route-criar-pessoa")
+        .process(validarPessoaProcessor) //Este processor injetado (CDI) irá chamar um serviço SOAP.
+        .to("direct:verificar-pessoa") // Passa o fluxo para uma rota que irá chamar um serviço REST
+        .marshal().json() // coverte o objeto Java em JSON
+        .toD("kafka:{{demo.integration.people.persist}}?brokers={{kafka.bootstrap.server}}") //Envia o JSON para um tópico KAFKA      
+        .to("file:{{camel.quarkus.demo.audit}}?fileName=request.log&fileExist=Append&appendChars=\n") //Salva o JSON em um arquivo TEXTO
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(201))
+        .setBody(header(Exchange.HTTP_RESPONSE_TEXT));        
         
+		
+		/*
+		 * Consumidor Kafka
+		 * Recupera os dados de uma pessoa armazenada em um topico Kafka e grava na base de dados
+		 */
+		from("kafka:{{demo.integration.people.persist}}?brokers={{kafka.bootstrap.server}}")	
+		.log("Receiving from  Kafka: ${body}")
+		.unmarshal(new JacksonDataFormat(PessoaModel.class))
+        .to("jpa://com.redhat.consulting.demo.entity.Pessoa");		
+				
+		
+		/*
+		 * Importa um arquivo texto com os dados de uma pessoa
+		 */
+		from("file://{{camel.quarkus.demo.import}}?move=./done")
+		.unmarshal(new JacksonDataFormat(PessoaModel.class))
+		.to("direct:criar-pessoa")
+		.log("${body}");
+	
+		
 	}
 	
 }

@@ -1,7 +1,5 @@
 use pessoadb;
 
-use pessoadb;
-
 CREATE TABLE `tb_pessoa` (
   `pessoaId` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(45) NOT NULL,
@@ -13,5 +11,5 @@ CREATE TABLE `tb_pessoa` (
   PRIMARY KEY (`pessoaId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-drop table  tb_pessoa
+
 

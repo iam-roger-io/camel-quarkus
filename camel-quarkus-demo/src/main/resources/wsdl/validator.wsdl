@@ -68,7 +68,7 @@
   </wsdl:binding>
   <wsdl:service name="ValidatorWebServiceService">
     <wsdl:port binding="tns:ValidatorWebServiceServiceSoapBinding" name="ValidatorWebServicePort">
-      <soap:address location="http://camel-quarkus-soap-camel-quarkus-demo.apps.cluster-fs9ff.fs9ff.sandbox1420.opentlc.com/soap/validator?wsdl"/>
+      <soap:address location="http://camel-quarkus-soap-ti-redhat-camel-quarkus.apps.cluster-2zc2n.2zc2n.sandbox915.opentlc.com/soap/validator?wsdl"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
