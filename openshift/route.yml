@@ -2,7 +2,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: proxy-rest
-  namespace: telefonica-amq-streams-dev
+  namespace: amq-streams-dev
   labels:
     app: proxy-rest
     app.kubernetes.io/component: proxy-rest
