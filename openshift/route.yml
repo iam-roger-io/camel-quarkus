@@ -1,0 +1,23 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: proxy-rest
+  namespace: telefonica-amq-streams-dev
+  labels:
+    app: proxy-rest
+    app.kubernetes.io/component: proxy-rest
+    app.kubernetes.io/instance: proxy-rest
+    app.kubernetes.io/name: proxy-rest
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  to:
+    kind: Service
+    name: proxy-rest
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None
